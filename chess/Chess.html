@@ -1,0 +1,426 @@
+<html>
+
+<!--==========================================================================-->
+
+<head>
+  <title>Chess Editor</title>
+  <script type='text/javascript' src='../epilog/javascript/epilog.js'></script>
+  <script type='text/javascript' src='../worksheets/javascript/worksheets.js'></script>
+  <script type='text/javascript' src='/epilog/javascript/epilog.js'></script>
+  <script type='text/javascript' src='/worksheets/javascript/worksheets.js'></script>
+  <script type='text/javascript'>
+//------------------------------------------------------------------------------
+// Code
+//------------------------------------------------------------------------------
+
+var rules = [];
+
+function setup ()
+ {var bases = readdata(document.getElementById('library').textContent);
+  definerules(library,rules.concat(bases));
+  populatesheet();
+  return true}
+
+function doopen ()
+ {var widget = document.getElementsByName('facts')[0];
+  var save = document.getElementById('save');
+  var back = document.getElementById('back');
+  highlight(widget);
+  save.removeAttribute('disabled');
+  back.removeAttribute('disabled');
+  return true}
+
+function doupdate ()
+ {var widget = document.getElementsByName('facts')[0];
+  var save = document.getElementById('save');
+  var back = document.getElementById('back');
+  var result = widget.value;
+  rules = readdata(result);
+  console.log('update check');
+  if (result.trim().length>0 && rules.length===0)
+     {alert('Syntax error.'); return false};
+  console.log('update check passed');
+  var bases = readdata(document.getElementById('library').textContent);
+  definerules(library,rules.concat(bases));
+  populatesheet();
+  backlight(widget);
+  save.setAttribute('disabled','true');
+  back.setAttribute('disabled','true');
+  return true}
+
+function dorevert ()
+ {var widget = document.getElementsByName('facts')[0];
+  var save = document.getElementById('save');
+  var back = document.getElementById('back');
+  widget.value = grindem(lambda)
+  backlight(widget);
+  save.setAttribute('disabled','true');
+  back.setAttribute('disabled','true');
+  return true}
+
+function populatesheet ()
+ {var widgets = document.querySelectorAll('[id]');
+  for (var i=0; i<widgets.length; i++)
+      {populate(widgets[i])};
+  document.getElementsByName('facts')[0].value = grindem(lambda.sort());
+  reposition();
+  return true}
+
+function highlight (widget)
+ {widget.style.boxShadow = '0px 0px 4px 5px rgba(54,239,72,0.8)';
+  widget.style.backgroundColor = '#ffffff';
+  return false}
+
+function backlight (widget)
+ {widget.style.boxShadow = 'none';
+  widget.style.backgroundColor = '#eeeeee';
+  return true}
+
+//------------------------------------------------------------------------------
+
+function drag (ev)
+ {ev.dataTransfer.setData("text",ev.target.parentNode.id);
+  console.log('Dragging ' + ev.target.parentNode.id);
+  return true}
+
+function drop (ev)
+ {//ev.preventDefault();
+  console.log(ev.target.id);
+  console.log(ev.target.parentNode);
+  if (ev.target.id) {target = ev.target.id}
+     else {target = ev.target.parentNode.id};
+  console.log('Dropped ' + ev.dataTransfer.getData("text") + ' in ' + target);
+  var source = ev.dataTransfer.getData("text");
+  fullreact(seq('drag',read(source),read(target)));
+  return true}
+
+//------------------------------------------------------------------------------
+// End
+//------------------------------------------------------------------------------
+  </script>
+</head>
+
+<!--=========================================================================-->
+
+<body bgcolor='#990000' onload='initialize()'>
+  <center>
+    <table width='720' bgcolor='#ffffff'>
+      <tr>
+        <td>
+
+<!--=========================================================================-->
+
+<center>
+  <br/>
+  <table>
+    <tr>
+      <td width='180' align='center'>
+      </td>
+      <td style='font-size:48px;cursor:pointer' onclick='display("introduction")'>Chess Editor</td>
+      <td width='180' align='center'>
+      </td>
+    </tr>
+  </table>
+  <br/>
+</center>
+
+
+<center>
+  <br/>
+Drag pieces to desired squares or edit Lambda.  To remove, drag to trash.<br/>
+</center>
+
+<center>
+  <br/>
+  Player Turn: 
+</center>
+
+<table border='0'>
+  <tr>
+    <td align='center'>
+      <table cellspacing='2' border='4'>
+        <tr><td id='base(wk)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_King.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(wq)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Queen.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(wb)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Bishop.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(wn)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Knight.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(wr)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Rook.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(wp)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Pawn.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+      </table>
+    </td>
+    <td>
+      <table cellspacing='2' border='4'>
+        <tr>
+          <td id='cell(a,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,8)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,7)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,6)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,5)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,4)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,3)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,2)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+        <tr>
+          <td id='cell(a,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(b,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(c,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(d,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(e,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(f,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(g,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+          <td id='cell(h,1)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'>&nbsp;</td>
+        </tr>
+      </table>
+    </td>
+    <td align='center'>
+      <table cellspacing='2' border='4'>
+        <tr><td id='base(bk)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_King.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(bq)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Queen.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(bb)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Bishop.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(bn)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Knight.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(br)'width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Rook.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+        <tr><td id='base(bp)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Pawn.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</center>
+
+<center>
+  <img id='trash' src="trash.jpeg" width='60' height='60' ondragover='allowdrop(event)' ondrop='drop(event)'/>
+  <br/>
+  <br/>
+</center>
+
+        </td>
+      </tr>
+    </table>
+  </center>
+  <br/>
+
+<!--=========================================================================-->
+
+<center>
+  <table width='720' cellspacing='0' cellpadding='0'>
+    <tr>
+      <td valign='top'>
+
+<table cellpadding='0' cellspacing='0' bgcolor='#ffffff' border='1'>
+  <tr>
+    <td height='30' bgcolor='lightgrey' align='center' valign='center'>Lambda</td>
+  </tr>
+  <tr>
+    <td height='30' bgcolor='lightgrey' align='center' valign='center'>
+      <input id='save' type='button' value='Save' onclick='doupdate()' disabled/>
+      <input id='back' type='button' value='Revert' onclick='dorevert()' disabled/>
+    </td>
+  </tr>
+  <tr>
+    <td>
+<textarea name='facts' style='font-family:courier;background-color:#eeeeee' rows='48' cols='100' oninput='doopen(this)'>></textarea>
+    </td>
+  </tr>
+</table>
+
+      </td>
+    </tr>
+  </table>
+</center>
+
+<!--=========================================================================-->
+
+<textarea id='library' style='width:800px;font-family:courier;display:none' rows='20'>
+
+file(a)
+file(b)
+file(c)
+file(d)
+file(e)
+file(f)
+file(g)
+file(h)
+
+rank(1)
+rank(2)
+rank(3)
+rank(4)
+rank(5)
+rank(6)
+rank(7)
+rank(8)
+
+% C1 is an increment of C2 if they are adjacent letters
+colAdjacent(a,b)
+colAdjacent(b,a)
+colAdjacent(b,c)
+colAdjacent(c,b)
+colAdjacent(c,d)
+colAdjacent(d,c)
+colAdjacent(d,e)
+colAdjacent(e,d)
+colAdjacent(e,f)
+colAdjacent(f,e)
+colAdjacent(f,g)
+colAdjacent(g,f)
+colAdjacent(g,h)
+colAdjacent(h,g)
+
+%L1 is an increment of L2 if they are both lines and they are adjecent numbers
+lineAdjacent(1,2)
+lineAdjacent(2,1)
+lineAdjacent(2,3)
+lineAdjacent(3,2)
+lineAdjacent(3,4)
+lineAdjacent(4,3)
+lineAdjacent(4,5)
+lineAdjacent(5,4)
+lineAdjacent(5,6)
+lineAdjacent(6,5)
+lineAdjacent(6,7)
+lineAdjacent(7,6)
+lineAdjacent(7,8)
+lineAdjacent(8,7)
+
+% C1 is an increment of C2 if it comes after
+colIncrement(a,b)
+colIncrement(b,c)
+colIncrement(c,d)
+colIncrement(d,e)
+colIncrement(e,f)
+colIncrement(f,g)
+colIncrement(g,h)
+
+% L1 is an increment of L2 if it comes after
+lineIncrement(1,2)
+lineIncrement(2,3)
+lineIncrement(3,4)
+lineIncrement(4,5)
+lineIncrement(5,6)
+lineIncrement(6,7)
+lineIncrement(7,8)
+
+empty(M,N) :- file(M) & rank(N) & ~occupied(M,N)
+
+occupied(M,N) :- cell(M,N,R)
+
+innerhtml(cell(M,N),"<img src='White_King.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,wk)
+innerhtml(cell(M,N),"<img src='White_Queen.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,wq)
+innerhtml(cell(M,N),"<img src='White_Bishop.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,wb)
+innerhtml(cell(M,N),"<img src='White_Knight.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,wn)
+innerhtml(cell(M,N),"<img src='White_Rook.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,wr)
+innerhtml(cell(M,N),"<img src='White_Pawn.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,wp)
+innerhtml(cell(M,N),"<img src='Black_King.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bk)
+innerhtml(cell(M,N),"<img src='Black_Queen.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bq)
+innerhtml(cell(M,N),"<img src='Black_Bishop.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bb)
+innerhtml(cell(M,N),"<img src='Black_Knight.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bn)
+innerhtml(cell(M,N),"<img src='Black_Rook.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,br)
+innerhtml(cell(M,N),"<img src='Black_Pawn.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bp)
+innerhtml(cell(M,N),"&nbsp;") :- empty(M,N)
+
+style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
+style(cell(M,N),"cursor","text") :- empty(M,N)
+
+kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
+kingMove(C,L1,C,L2) :- lineAdjacent(L1,L2)
+kingMove(C1,L1,C2,L2) :- colIncrement(C1, C2) & lineIncrement(L1,L2)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Actions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+load :: false ==> true
+
+drag(cell(U,V),cell(X,Y)) :: cell(U,V,wk) & kingMove(C1,L1,C2,L2)
+ ==> cell(X,Y,P)
+
+</textarea>
+
+<!--=======================================================================-->
+
+<textarea id='lambda' type='text/hrf' style='display:none'>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Lambda
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+cell(a,1,wr)    cell(a,2,wp)    cell(a,7,bp)    cell(a,8,br)
+cell(b,1,wn)    cell(b,2,wp)    cell(b,7,bp)    cell(b,8,bn)
+cell(c,1,wb)    cell(c,2,wp)    cell(c,7,bp)    cell(c,8,bb)
+cell(d,1,wq)    cell(d,2,wp)    cell(d,7,bp)    cell(d,8,bq)
+cell(e,1,wk)    cell(e,2,wp)    cell(e,7,bp)    cell(e,8,bk)
+cell(f,1,wb)    cell(f,2,wp)    cell(f,7,bp)    cell(f,8,bb)
+cell(g,1,wn)    cell(g,2,wp)    cell(g,7,bp)    cell(g,8,bn)
+cell(h,1,wr)    cell(h,2,wp)    cell(h,7,bp)    cell(h,8,br)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% End of Rules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+</textarea>
+
+<!--=========================================================================-->
+
+</body>
+
+<!--=========================================================================-->
+
+</html>
