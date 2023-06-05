@@ -132,7 +132,7 @@ Drag pieces to desired squares or edit Lambda.  To remove, drag to trash.<br/>
 
 <center>
   <br/>
-  Player Turn: 
+  Player Turn: <span id='control' style='font-size:18px;color:#666666'>White</span>
 </center>
 
 <table border='0'>
@@ -375,7 +375,7 @@ innerhtml(cell(M,N),"<img src='Black_Knight.png' height='50' draggable='true' on
 innerhtml(cell(M,N),"<img src='Black_Rook.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,br)
 innerhtml(cell(M,N),"<img src='Black_Pawn.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bp)
 innerhtml(cell(M,N),"&nbsp;") :- empty(M,N)
-
+innerhtml(control,W) :- control(W)
 style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
 style(cell(M,N),"cursor","text") :- empty(M,N)
 
@@ -383,13 +383,28 @@ kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
 kingMove(C,L1,C,L2) :- lineAdjacent(L1,L2)
 kingMove(C1,L1,C2,L2) :- colIncrement(C1, C2) & lineIncrement(L1,L2)
 
+member(X, [X|_])
+member(X, [_|Tail]) :- member(X, Tail)
 
+isWhite(P) :- member(P, [wk, wq, wr, wb, wn, wp])
+isBlack(P) :- member(P, [bk, bq, br, bb, bn, bp])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Actions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load :: false ==> true
+
+drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
+drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
+
+drag(base(P),trash) :: false ==> true
+
+drag(cell(U,V),trash) :: cell(U,V,P) ==> ~cell(U,V,P)
+
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
+
 
 drag(cell(U,V),cell(X,Y)) :: cell(U,V,wk) & kingMove(C1,L1,C2,L2)
  ==> cell(X,Y,P)
@@ -411,6 +426,8 @@ cell(e,1,wk)    cell(e,2,wp)    cell(e,7,bp)    cell(e,8,bk)
 cell(f,1,wb)    cell(f,2,wp)    cell(f,7,bp)    cell(f,8,bb)
 cell(g,1,wn)    cell(g,2,wp)    cell(g,7,bp)    cell(g,8,bn)
 cell(h,1,wr)    cell(h,2,wp)    cell(h,7,bp)    cell(h,8,br)
+
+control(white)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% End of Rules
