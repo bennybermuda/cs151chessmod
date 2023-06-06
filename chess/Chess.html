@@ -405,8 +405,8 @@ drag(base(P),trash) :: false ==> true
 drag(cell(U,V),trash) :: cell(U,V,P) ==> ~cell(U,V,P)
 
 %Prevent taking your own pieces
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
 
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
