@@ -292,23 +292,23 @@ Drag pieces to desired squares or edit Lambda.  To remove, drag to trash.<br/>
 
 <textarea id='library' style='width:800px;font-family:courier;display:none' rows='20'>
 
-file(a)
-file(b)
-file(c)
-file(d)
-file(e)
-file(f)
-file(g)
-file(h)
+col(a)
+col(b)
+col(c)
+col(d)
+col(e)
+col(f)
+col(g)
+col(h)
 
-rank(1)
-rank(2)
-rank(3)
-rank(4)
-rank(5)
-rank(6)
-rank(7)
-rank(8)
+line(1)
+line(2)
+line(3)
+line(4)
+line(5)
+line(6)
+line(7)
+line(8)
 
 % C1 is an increment of C2 if they are adjacent letters
 colAdjacent(a,b)
@@ -360,7 +360,7 @@ lineIncrement(5,6)
 lineIncrement(6,7)
 lineIncrement(7,8)
 
-empty(M,N) :- file(M) & rank(N) & ~occupied(M,N)
+empty(M,N) :- col(M) & line(N) & ~occupied(M,N)
 
 occupied(M,N) :- cell(M,N,R)
 
@@ -381,12 +381,39 @@ innerhtml(control,W) :- control(W)
 style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
 style(cell(M,N),"cursor","text") :- empty(M,N)
 
+% king moves %
 kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
 kingMove(C,L1,C,L2) :- lineAdjacent(L1,L2)
-kingMove(C1,L1,C2,L2) :- colIncrement(C1, C2) & lineIncrement(L1,L2)
+kingMove(C1,L1,C2,L2) :- colAdjacent(C1, C2) & lineAdjacent(L1,L2)
 
+% horse moves %
+horseMove(C1,L1,C2,L2) :- col(Y) & colAdjacent(C1, Y) & colAdjacent(Y, C2) & lineAdjacent(L1, L2)
+horseMove(C1,L1,C2,L2) :- line(Y) & lineAdjacent(L1, Y) & lineAdjacent(Y, L2) & colAdjacent(C1, C2)
 member(X, [X|_])
 member(X, [_|Tail]) :- member(X, Tail)
+
+% rook %
+% true if a piece in C1,L1 can move to the right to C2,L2
+moveRight(C1,L,C2,L) :- colIncrement(C1, C2) 
+moveRight(C1,L,C2,L) :- colIncrement(C1, Y) & moveRight(Y, L, C2, L) & empty(Y,L)
+
+% true if a piece in C1,L1 can move to the left to C2,L2
+moveLeft(C1,L,C2,L) :- colIncrement(C2, C1)
+moveLeft(C1,L,C2,L) :- colIncrement(Y, C1) & moveLeft(Y, L, C2, L)& empty(Y,L) 
+
+% true if a piece in C1,L1 can move up to C2,L2
+moveUp(C,L1,C,L2) :- lineIncrement(L1, L2) 
+moveUp(C,L1,C,L2) :- lineIncrement(L1, Y) & moveUp(C, Y, C, L2) & empty(C,Y) 
+
+% true if a piece in C1,L1 can move down to C2,L2
+moveDown(C,L1,C,L2) :- lineIncrement(L2, L1)
+moveDown(C,L1,C,L2) :- lineIncrement(Y, L1) & moveDown(C, Y, C, L2) & empty(C,Y) 
+
+rookMove(C1,L1,C2,L2) :- moveRight(C1,L1,C2,L2)
+rookMove(C1,L1,C2,L2) :- moveLeft(C1,L1,C2,L2)
+rookMove(C1,L1,C2,L2) :- moveUp(C1,L1,C2,L2)
+rookMove(C1,L1,C2,L2) :- moveDown(C1,L1,C2,L2)
+
 
 isWhite(P) :- member(P, [wk, wq, wr, wb, wn, wp])
 isBlack(P) :- member(P, [bk, bq, br, bb, bn, bp])
@@ -404,16 +431,27 @@ drag(base(P),trash) :: false ==> true
 
 drag(cell(U,V),trash) :: cell(U,V,P) ==> ~cell(U,V,P)
 
-%Prevent taking your own pieces
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
+drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
+drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
+
+%Movement to occupied spaces - prevents taking your own pieces
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
 
 %Movement into empty spaces
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
 
-drag(cell(U,V),cell(X,Y)) :: cell(U,V,wk) & kingMove(C1,L1,C2,L2)
- ==> cell(X,Y,P)
+moveAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y)
+% TODO: fix rook
+%moveAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y)
+%moveAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y)
+
+
+
 
 </textarea>
 
