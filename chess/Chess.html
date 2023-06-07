@@ -509,9 +509,17 @@ drag(cell(U,V),trash) :: cell(U,V,P) ==> ~cell(U,V,P)
 drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
 drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
 
+%pawn becomes queen
+drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & attackAllowed(U,V,X,Y,wp) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,wp) & ~cell(X,8,Q)  & cell(X,8,wq) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & attackAllowed(U,V,X,Y,bp) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,bp) & ~cell(X,1,Q) & cell(X,1,bq) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & moveAllowed(U,V,X,8,wp) & empty(X,8) ==> ~cell(U,V,wp) & cell(X,8,wq) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & moveAllowed(U,V,X,1,bp) & empty(X,8) ==> ~cell(U,V,bp) & cell(X,1,bq) & control(white) & ~control(black)
+
 %Movement to occupied spaces (also prevents taking your own pieces)
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
+drag(cell(U,8),cell(X,Y)) :: cell(U,8,wq) & cell(U,8,R) & distinct(wq, R) & control(white) & moveAllowed(U,8,X,Y,P) ==> ~cell(U,8,R) & ~cell(U,8,wq)
+drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & control(black) & moveAllowed(U,1,X,Y,P) ==> ~cell(U,1,R) & ~cell(U,1,bq)
 
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
