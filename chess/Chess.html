@@ -127,7 +127,7 @@ function drop (ev)
 
 <center>
   <br/>
-Drag pieces to desired squares or edit Lambda.  To remove, drag to trash.<br/>
+Drag pieces to desired squares or edit Lambda.  To restart, press the restart button.<br/>
 </center>
 
 <center>
@@ -137,16 +137,6 @@ Drag pieces to desired squares or edit Lambda.  To remove, drag to trash.<br/>
 
 <table border='0'>
   <tr>
-    <td align='center'>
-      <table cellspacing='2' border='4'>
-        <tr><td id='base(wk)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_King.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(wq)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Queen.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(wb)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Bishop.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(wn)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Knight.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(wr)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Rook.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(wp)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="White_Pawn.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-      </table>
-    </td>
     <td>
       <table cellspacing='2' border='4'>
         <tr>
@@ -231,22 +221,11 @@ Drag pieces to desired squares or edit Lambda.  To remove, drag to trash.<br/>
         </tr>
       </table>
     </td>
-    <td align='center'>
-      <table cellspacing='2' border='4'>
-        <tr><td id='base(bk)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_King.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(bq)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Queen.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(bb)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Bishop.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(bn)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Knight.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(br)'width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Rook.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-        <tr><td id='base(bp)' width='60' height='60' align='center' valign='center' ondragover='allowdrop(event)' ondrop='drop(event)'><img src="Black_Pawn.png" width='40' height='40' draggable='true' ondragstart='drag(event)'/></td></tr>
-      </table>
-    </td>
   </tr>
 </table>
 </center>
 
 <center>
-  <img id='trash' src="trash.jpeg" width='60' height='60' ondragover='allowdrop(event)' ondrop='drop(event)'/>
   <img id='restart' src="refresh.png" width='60' height='60' onclick='initialize()' />
 
   <br/>
@@ -462,7 +441,7 @@ queenMove(C1,L1,C2,L2) :- diagonalUpLeft(C1,L1,C2,L2)
 queenMove(C1,L1,C2,L2) :- diagonalDownRight(C1,L1,C2,L2)
 queenMove(C1,L1,C2,L2) :- diagonalDownLeft(C1,L1,C2,L2)
 
-
+% this is for the only move your piece check %
 isWhite(P) :- member(P, [wk, wq, wr, wb, wn, wp])
 isBlack(P) :- member(P, [bk, bq, br, bb, bn, bp])
 
@@ -497,8 +476,6 @@ attackAllowed(U,V,X,Y,bq) :- queenMove(U,V,X,Y)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load :: false ==> true
-
-
 drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
 drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
 
@@ -518,15 +495,13 @@ drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & moveAllowed(U,V,X,1
 %Movement to occupied spaces (also prevents taking your own pieces)
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
+% this ensures the pawn is removed from last row, so that it doesn't stay behind when queen leaves
 drag(cell(U,8),cell(X,Y)) :: cell(U,8,wq) & cell(U,8,R) & distinct(wq, R) & control(white) & moveAllowed(U,8,X,Y,P) ==> ~cell(U,8,R) & ~cell(U,8,wq)
 drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & control(black) & moveAllowed(U,1,X,Y,P) ==> ~cell(U,1,R) & ~cell(U,1,bq)
 
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
-
-
-
 
 </textarea>
 
