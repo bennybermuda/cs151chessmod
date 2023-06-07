@@ -421,12 +421,13 @@ pawnAttackWhite(C1, L1, C2, L2) :- colAdjacent(C1, C2) & lineIncrement(L1,L2)
 pawnAttackBlack(C1, L1, C2, L2) :- colAdjacent(C1, C2) & lineIncrement(L2,L1)
 
 % pawn move %
+%
 % true if a white pawn at C1,L1 can move to C2,L2 
 pawnMoveWhite(C, L1, C, L2) :- lineIncrement(L1,L2)
-pawnMoveWhite(C, L1, C, L2) :- line(Y) & lineIncrement(L1,Y) & lineIncrement(Y,L2)
+pawnMoveWhite(C, 2, C, 4) 
 % true if a black pawn at C1,L1 can move to C2,L2 
 pawnMoveBlack(C, L1, C, L2) :- lineIncrement(L2,L1)
-pawnMoveBlack(C, L1, C, L2) :- line(Y) & lineIncrement(L2,Y) & lineIncrement(Y,L1)
+pawnMoveBlack(C, 7, C, 5)
 
 % bishop move and attack %
 
