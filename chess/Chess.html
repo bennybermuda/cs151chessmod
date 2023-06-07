@@ -381,25 +381,25 @@ innerhtml(control,W) :- control(W)
 style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
 style(cell(M,N),"cursor","text") :- empty(M,N)
 
-% king moves %
+% king moves and attack %
 kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
 kingMove(C,L1,C,L2) :- lineAdjacent(L1,L2)
 kingMove(C1,L1,C2,L2) :- colAdjacent(C1, C2) & lineAdjacent(L1,L2)
 
-% horse moves %
+% horse moves and attack %
 horseMove(C1,L1,C2,L2) :- col(Y) & colAdjacent(C1, Y) & colAdjacent(Y, C2) & lineAdjacent(L1, L2)
 horseMove(C1,L1,C2,L2) :- line(Y) & lineAdjacent(L1, Y) & lineAdjacent(Y, L2) & colAdjacent(C1, C2)
 member(X, [X|_])
 member(X, [_|Tail]) :- member(X, Tail)
 
-% rook %
+% rook moves and attack %
 % true if a piece in C1,L1 can move to the right to C2,L2
 moveRight(C1,L,C2,L) :- colIncrement(C1, C2) 
 moveRight(C1,L,C2,L) :- colIncrement(C1, Y) & moveRight(Y, L, C2, L) & empty(Y,L)
 
 % true if a piece in C1,L1 can move to the left to C2,L2
 moveLeft(C1,L,C2,L) :- colIncrement(C2, C1)
-moveLeft(C1,L,C2,L) :- colIncrement(Y, C1) & moveLeft(Y, L, C2, L)& empty(Y,L) 
+moveLeft(C1,L,C2,L) :- colIncrement(Y, C1) & moveLeft(Y, L, C2, L) & empty(Y,L) 
 
 % true if a piece in C1,L1 can move up to C2,L2
 moveUp(C,L1,C,L2) :- lineIncrement(L1, L2) 
@@ -414,15 +414,89 @@ rookMove(C1,L1,C2,L2) :- moveLeft(C1,L1,C2,L2)
 rookMove(C1,L1,C2,L2) :- moveUp(C1,L1,C2,L2)
 rookMove(C1,L1,C2,L2) :- moveDown(C1,L1,C2,L2)
 
+% pawn attack %
+%true if a white pawn at C1,L1 can attack a piece at C2,L2 (diagonal, up)
+pawnAttackWhite(C1, L1, C2, L2) :- colAdjacent(C1, C2) & lineIncrement(L1,L2)
+%true if a black pawn at C1,L1 can attack a piece at C2,L2 (diagonal, down)
+pawnAttackBlack(C1, L1, C2, L2) :- colAdjacent(C1, C2) & lineIncrement(L2,L1)
+
+% pawn move %
+% true if a white pawn at C1,L1 can move to C2,L2 
+pawnMoveWhite(C, L1, C, L2) :- lineIncrement(L1,L2)
+pawnMoveWhite(C, L1, C, L2) :- line(Y) & lineIncrement(L1,Y) & lineIncrement(Y,L2)
+% true if a black pawn at C1,L1 can move to C2,L2 
+pawnMoveBlack(C, L1, C, L2) :- lineIncrement(L2,L1)
+pawnMoveBlack(C, L1, C, L2) :- line(Y) & lineIncrement(L2,Y) & lineIncrement(Y,L1)
+
+% bishop move and attack %
+
+% true if a piece in C1,L1 can move to the right and up to C2,L2
+diagonalUpRight(C1,L1,C2,L2) :- colIncrement(C1, C2) & lineIncrement(L1, L2)
+diagonalUpRight(C1,L1,C2,L2) :- col(CY) & line(LY) & empty(CY,LY) & colIncrement(C1, CY) & lineIncrement(L1, LY) & diagonalUpRight(CY,LY,C2,L2) 
+
+% true if a piece in C1,L1 can move to the left and up to C2,L2
+diagonalUpLeft(C1,L1,C2,L2) :- colIncrement(C2, C1) & lineIncrement(L1, L2)
+diagonalUpLeft(C1,L1,C2,L2) :- col(CY) & line(LY) & empty(CY,LY) & colIncrement(CY, C1) & lineIncrement(L1, LY) & diagonalUpLeft(CY,LY,C2,L2)
+
+% true if a piece in C1,L1 can move to the left and up to C2,L2
+diagonalDownRight(C1,L1,C2,L2) :- colIncrement(C1, C2) & lineIncrement(L2, L1)
+diagonalDownRight(C1,L1,C2,L2) :- col(CY) & line(LY) & empty(CY,LY) & colIncrement(C1, CY) & lineIncrement(LY, L1) & diagonalDownRight(CY,LY,C2,L2)
+
+% true if a piece in C1,L1 can move to the left and up to C2,L2
+diagonalDownLeft(C1,L1,C2,L2) :- colIncrement(C2, C1) & lineIncrement(L2, L1)
+diagonalDownLeft(C1,L1,C2,L2) :- col(CY) & line(LY) & empty(CY,LY) & colIncrement(CY, C1) & lineIncrement(LY, L1) & diagonalDownLeft(CY,LY,C2,L2)
+
+bishopMove(C1,L1,C2,L2) :- diagonalUpRight(C1,L1,C2,L2)
+bishopMove(C1,L1,C2,L2) :- diagonalUpLeft(C1,L1,C2,L2)
+bishopMove(C1,L1,C2,L2) :- diagonalDownRight(C1,L1,C2,L2)
+bishopMove(C1,L1,C2,L2) :- diagonalDownLeft(C1,L1,C2,L2)
+
+% queen move and attack %
+queenMove(C1,L1,C2,L2) :- moveRight(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- moveLeft(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- moveUp(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- moveDown(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- diagonalUpRight(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- diagonalUpLeft(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- diagonalDownRight(C1,L1,C2,L2)
+queenMove(C1,L1,C2,L2) :- diagonalDownLeft(C1,L1,C2,L2)
+
 
 isWhite(P) :- member(P, [wk, wq, wr, wb, wn, wp])
 isBlack(P) :- member(P, [bk, bq, br, bb, bn, bp])
+
+moveAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,wp) :- pawnMoveWhite(U,V,X,Y)
+moveAllowed(U,V,X,Y,bp) :- pawnMoveBlack(U,V,X,Y)
+moveAllowed(U,V,X,Y,wb) :- bishopMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,bb) :- bishopMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,wq) :- queenMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,bq) :- queenMove(U,V,X,Y)
+
+attackAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,wp) :- pawnAttackWhite(U,V,X,Y)
+attackAllowed(U,V,X,Y,bp) :- pawnAttackBlack(U,V,X,Y)
+attackAllowed(U,V,X,Y,wb) :- bishopMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,bb) :- bishopMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,wq) :- queenMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,bq) :- queenMove(U,V,X,Y)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Actions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load :: false ==> true
+
 
 drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
 drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
@@ -434,21 +508,13 @@ drag(cell(U,V),trash) :: cell(U,V,P) ==> ~cell(U,V,P)
 drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
 drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
 
-%Movement to occupied spaces - prevents taking your own pieces
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
+%Movement to occupied spaces (also prevents taking your own pieces)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
 
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
-
-moveAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y)
-% TODO: fix rook
-%moveAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y)
-%moveAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y)
 
 
 
