@@ -359,6 +359,11 @@ innerhtml(cell(M,N),"&nbsp;") :- empty(M,N)
 innerhtml(control,W) :- control(W)
 style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
 style(cell(M,N),"cursor","text") :- empty(M,N)
+style(cell(M,N), "background-color", "lightblue") :- highlight(M,N)
+
+attribute(cell(M,N),"onclick","modbutton(this)") :- col(M) & line(N) & cell(M,N,wp)
+click(cell(M,N)) :: cell(M,N,wp) & control(white) & pawnAttackWhite(M,N,U,V) & cell(U,V,Q) & isBlack(Q) ==> highlight(U,V)
+
 
 % king moves and attack %
 kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
@@ -502,6 +507,10 @@ drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & cont
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
+
+cor(X,Y) :- value(cell, background-color, "blue")
+
+click(cell(M,N)) :: cell(M,N, P) ==> cor(X,Y)
 
 </textarea>
 
