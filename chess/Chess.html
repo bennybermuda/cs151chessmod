@@ -379,24 +379,22 @@ click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) ==> selectedpiece(
 click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) ==> selectedpiece(P) & highlight(M,N, "lightblue")
 
 % resets everything to white when you click a new piece
-click(cell(U,V)) :: col(M) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
-click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+click(cell(U,V)) :: col(M) & line(N) &distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+click(cell(U,V)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 
-click(cell(U,V)) :: col(M) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
-click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+click(cell(U,V)) :: col(M) & line(N) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+click(cell(U,V)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
 
-click(cell(U,V)) :: col(M) & distinct(M, U) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
-click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+click(cell(U,V)) :: col(M)  & line(N) & distinct(M, U) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+click(cell(U,V)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
 
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
-drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
-drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
 
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
-drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
-
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N)  & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
 
 % king moves and attack %
 kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
@@ -560,6 +558,8 @@ cell(e,1,wk)    cell(e,2,wp)    cell(e,7,bp)    cell(e,8,bk)
 cell(f,1,wb)    cell(f,2,wp)    cell(f,7,bp)    cell(f,8,bb)
 cell(g,1,wn)    cell(g,2,wp)    cell(g,7,bp)    cell(g,8,bn)
 cell(h,1,wr)    cell(h,2,wp)    cell(h,7,bp)    cell(h,8,br)
+
+
 
 control(white)
 
