@@ -514,8 +514,8 @@ drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & moveAllowed(U,V,X,1
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
 % this ensures the pawn is removed from last row, so that it doesn't stay behind when queen leaves
-drag(cell(U,8),cell(X,Y)) :: cell(U,8,wq) & cell(U,8,R) & distinct(wq, R) & control(white) & moveAllowed(U,8,X,Y,P) ==> ~cell(U,8,R) & ~cell(U,8,wq)
-drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & control(black) & moveAllowed(U,1,X,Y,P) ==> ~cell(U,1,R) & ~cell(U,1,bq)
+drag(cell(U,8),cell(X,Y)) :: cell(U,8,wq) & cell(U,8,R) & distinct(wq, R) & control(white) & queenMove(U,8,X,Y) ==> ~cell(U,8,R) & ~cell(U,8,wq) & test
+drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & control(black) & queenMove(U,1,X,Y) ==> ~cell(U,1,R) & ~cell(U,1,bq)
 
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
