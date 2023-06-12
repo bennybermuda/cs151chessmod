@@ -391,10 +391,10 @@ click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  
 drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
 drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
 
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
 drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
 
 
