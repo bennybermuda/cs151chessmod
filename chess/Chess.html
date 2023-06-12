@@ -372,8 +372,11 @@ click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) &  moveAllowed(M,N
 click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) ==> selectedpiece(P) & highlight(M,N, "lightblue")
 click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) ==> selectedpiece(P) & highlight(M,N, "lightblue")
 
+click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) & selectedpiece(Q) ==> ~selectedpiece(Q) & selectedpiece(P) & highlight(M,N, "lightblue")
+click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) & selectedpiece(Q) ==> ~selectedpiece(Q) & selectedpiece(P) & highlight(M,N, "lightblue")
+
 % resets everything to white when you click a new piece
-click(cell(U,V)) :: col(M) & line(N) &distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+click(cell(U,V)) :: col(M) & line(N) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 click(cell(U,V)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 
 click(cell(U,V)) :: col(M) & line(N) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
@@ -381,6 +384,9 @@ click(cell(U,V)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "yellow")
 
 click(cell(U,V)) :: col(M)  & line(N) & distinct(M, U) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
 click(cell(U,V)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+
+click(cell(U,V)) :: highlight(U,V, "yellow") & cell(U,V,P) & control(white) & isBlack(P) ==> highlight(U,V,"white") & ~highlight(U,V, "yellow")
+click(cell(U,V)) :: highlight(U,V, "yellow") & cell(U,V,P) & control(black) & isWhite(P) ==> highlight(U,V,"white") & ~highlight(U,V, "yellow")
 
 drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
 drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
@@ -508,16 +514,6 @@ attackAllowed(U,V,X,Y,bq, Q) :- queenMove(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load :: false ==> true
-drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
-drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
-
-drag(base(P),trash) :: false ==> true
-
-drag(cell(U,V),trash) :: cell(U,V,P) ==> ~cell(U,V,P)
-
-drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(white) & control(black)
-drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
-
 %pawn becomes queen
 drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & attackAllowed(U,V,X,Y,wp,Q) ==> ~cell(U,V,wp) & ~cell(X,8,Q)  & cell(X,8,wq) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & attackAllowed(U,V,X,Y,bp,Q) ==> ~cell(U,V,bp) & ~cell(X,1,Q) & cell(X,1,bq) & ~control(black) & control(white)
@@ -525,14 +521,19 @@ drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & moveAllowed(U,V,X,8
 drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & moveAllowed(U,V,X,1,bp)  ==> ~cell(U,V,bp) & cell(X,1,bq) & control(white) & ~control(black)
 
 %Movement to occupied spaces (also prevents taking your own pieces)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) & selectedpiece(P) ==> ~selectedpiece(P) & selectedpiece(n/a) & ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) & selectedpiece(P) ==> ~selectedpiece(P) & selectedpiece(n/a) & ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
+
 % this ensures the pawn is removed from last row, so that it doesn't stay behind when queen leaves
 drag(cell(U,8),cell(X,Y)) :: cell(U,8,wq) & cell(U,8,R) & distinct(wq, R) & control(white) & queenMove(U,8,X,Y) ==> ~cell(U,8,R) & ~cell(U,8,wq) & test
 drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & control(black) & queenMove(U,1,X,Y) ==> ~cell(U,1,R) & ~cell(U,1,bq)
 
 %Movement into empty spaces
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & selectedpiece(P) ==> ~selectedpiece(P) & selectedpiece(n/a) & ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & selectedpiece(P) ==> ~selectedpiece(P) & selectedpiece(n/a) & ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
 
 </textarea>
@@ -552,7 +553,6 @@ cell(e,1,wk)    cell(e,2,wp)    cell(e,7,bp)    cell(e,8,bk)
 cell(f,1,wb)    cell(f,2,wp)    cell(f,7,bp)    cell(f,8,bb)
 cell(g,1,wn)    cell(g,2,wp)    cell(g,7,bp)    cell(g,8,bn)
 cell(h,1,wr)    cell(h,2,wp)    cell(h,7,bp)    cell(h,8,br)
-
 
 
 control(white)
