@@ -362,13 +362,19 @@ style(cell(M,N),"cursor","text") :- empty(M,N)
 style(cell(M,N), "background-color", Color) :- highlight(M,N,Color)
 
 % hoghlights possible attacks when you click a wp
-attribute(cell(M,N),"onclick","modbutton(this)") :- col(M) & line(N) & cell(M,N,wp)
-click(cell(M,N)) :: cell(M,N,wp) & control(white) & pawnAttackWhite(M,N,U,V) & cell(U,V,Q) & isBlack(Q) ==> highlight(U,V, "lightblue")
+attribute(cell(M,N),"onclick","modbutton(this)") :- col(M) & line(N) & cell(M,N,P)
+click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) & cell(U,V,Q) & attackAllowed(M,N,U,V,P,Q) ==> highlight(U,V, "yellow")
+click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) & cell(U,V,Q) & attackAllowed(M,N,U,V,P,Q) ==> highlight(U,V, "yellow")
+
+click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) &  moveAllowed(M,N,U,V,P) ==> highlight(U,V, "lightyellow")
+click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) &  moveAllowed(M,N,U,V,P) ==> highlight(U,V, "lightyellow")
+
 
 % resets everything to white when you click a new piece
-click(cell(U,V)) :: col(M) & line(N) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
-drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
-
+click(cell(U,V)) :: col(M) & line(N) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+click(cell(U,V)) :: col(M) & line(N) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
 
 % king moves and attack %
 kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
@@ -376,8 +382,10 @@ kingMove(C,L1,C,L2) :- lineAdjacent(L1,L2)
 kingMove(C1,L1,C2,L2) :- colAdjacent(C1, C2) & lineAdjacent(L1,L2)
 
 % horse moves and attack %
-horseMove(C1,L1,C2,L2) :- col(Y) & colAdjacent(C1, Y) & colAdjacent(Y, C2) & lineAdjacent(L1, L2)
-horseMove(C1,L1,C2,L2) :- line(Y) & lineAdjacent(L1, Y) & lineAdjacent(Y, L2) & colAdjacent(C1, C2)
+horseMove(C1,L1,C2,L2) :- col(Y) & colIncrement(C1, Y) & colIncrement(Y, C2) & lineAdjacent(L1, L2)
+horseMove(C1,L1,C2,L2) :- col(Y) & colIncrement(C2, Y) & colIncrement(Y, C1) & lineAdjacent(L1, L2)
+horseMove(C1,L1,C2,L2) :- line(Y) & lineIncrement(L1, Y) & lineIncrement(Y, L2) & colAdjacent(C1, C2)
+horseMove(C1,L1,C2,L2) :- line(Y) & lineIncrement(L2, Y) & lineIncrement(Y, L1) & colAdjacent(C1, C2)
 member(X, [X|_])
 member(X, [_|Tail]) :- member(X, Tail)
 
@@ -455,31 +463,31 @@ queenMove(C1,L1,C2,L2) :- diagonalDownLeft(C1,L1,C2,L2)
 isWhite(P) :- member(P, [wk, wq, wr, wb, wn, wp])
 isBlack(P) :- member(P, [bk, bq, br, bb, bn, bp])
 
-moveAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,wp) :- pawnMoveWhite(U,V,X,Y)
-moveAllowed(U,V,X,Y,bp) :- pawnMoveBlack(U,V,X,Y)
-moveAllowed(U,V,X,Y,wb) :- bishopMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,bb) :- bishopMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,wq) :- queenMove(U,V,X,Y)
-moveAllowed(U,V,X,Y,bq) :- queenMove(U,V,X,Y)
+moveAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,wp) :- pawnMoveWhite(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,bp) :- pawnMoveBlack(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,wb) :- bishopMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,bb) :- bishopMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,wq) :- queenMove(U,V,X,Y) & empty(X,Y) 
+moveAllowed(U,V,X,Y,bq) :- queenMove(U,V,X,Y) & empty(X,Y) 
 
-attackAllowed(U,V,X,Y,wk) :- kingMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,bk) :- kingMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,wn) :- horseMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,bn) :- horseMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,wr) :- rookMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,br) :- rookMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,wp) :- pawnAttackWhite(U,V,X,Y)
-attackAllowed(U,V,X,Y,bp) :- pawnAttackBlack(U,V,X,Y)
-attackAllowed(U,V,X,Y,wb) :- bishopMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,bb) :- bishopMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,wq) :- queenMove(U,V,X,Y)
-attackAllowed(U,V,X,Y,bq) :- queenMove(U,V,X,Y)
+attackAllowed(U,V,X,Y,wk, Q) :- kingMove(U,V,X,Y) & cell(X,Y,Q) & isBlack(Q)
+attackAllowed(U,V,X,Y,bk, Q) :- kingMove(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
+attackAllowed(U,V,X,Y,wn, Q) :- horseMove(U,V,X,Y) & cell(X,Y,Q) & isBlack(Q)
+attackAllowed(U,V,X,Y,bn, Q) :- horseMove(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
+attackAllowed(U,V,X,Y,wr, Q) :- rookMove(U,V,X,Y) & cell(X,Y,Q) & isBlack(Q)
+attackAllowed(U,V,X,Y,br, Q) :- rookMove(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
+attackAllowed(U,V,X,Y,wp, Q) :- pawnAttackWhite(U,V,X,Y) & cell(X,Y,Q) & isBlack(Q)
+attackAllowed(U,V,X,Y,bp, Q) :- pawnAttackBlack(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
+attackAllowed(U,V,X,Y,wb, Q) :- bishopMove(U,V,X,Y) & cell(X,Y,Q) & isBlack(Q)
+attackAllowed(U,V,X,Y,bb, Q) :- bishopMove(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
+attackAllowed(U,V,X,Y,wq, Q) :- queenMove(U,V,X,Y) & cell(X,Y,Q) & isBlack(Q)
+attackAllowed(U,V,X,Y,bq, Q) :- queenMove(U,V,X,Y) & cell(X,Y,Q) & isWhite(Q)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Actions
@@ -497,21 +505,21 @@ drag(base(P),cell(X,Y)) :: control(white) & isWhite(P) & empty(X,Y) ==> cell(X,Y
 drag(base(P),cell(X,Y)) :: control(black) & isBlack(P) & empty(X,Y) ==> cell(X,Y,P) & ~control(black) & control(white)
 
 %pawn becomes queen
-drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & attackAllowed(U,V,X,Y,wp) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,wp) & ~cell(X,8,Q)  & cell(X,8,wq) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & attackAllowed(U,V,X,Y,bp) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,bp) & ~cell(X,1,Q) & cell(X,1,bq) & ~control(black) & control(white)
-drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & moveAllowed(U,V,X,8,wp) & empty(X,8) ==> ~cell(U,V,wp) & cell(X,8,wq) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & moveAllowed(U,V,X,1,bp) & empty(X,8) ==> ~cell(U,V,bp) & cell(X,1,bq) & control(white) & ~control(black)
+drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & attackAllowed(U,V,X,Y,wp,Q) ==> ~cell(U,V,wp) & ~cell(X,8,Q)  & cell(X,8,wq) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & attackAllowed(U,V,X,Y,bp,Q) ==> ~cell(U,V,bp) & ~cell(X,1,Q) & cell(X,1,bq) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,8)) :: control(white) & cell(U,V,wp) & moveAllowed(U,V,X,8,wp) ==> ~cell(U,V,wp) & cell(X,8,wq) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,1)) :: control(black) & cell(U,V,bp) & moveAllowed(U,V,X,1,bp)  ==> ~cell(U,V,bp) & cell(X,1,bq) & control(white) & ~control(black)
 
 %Movement to occupied spaces (also prevents taking your own pieces)
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isBlack(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P) & cell(X,Y,Q) & isWhite(Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & attackAllowed(U,V,X,Y,P,Q) ==> ~cell(U,V,P) & ~cell(X,Y,Q) & cell(X,Y,P) & ~control(black) & control(white)
 % this ensures the pawn is removed from last row, so that it doesn't stay behind when queen leaves
 drag(cell(U,8),cell(X,Y)) :: cell(U,8,wq) & cell(U,8,R) & distinct(wq, R) & control(white) & moveAllowed(U,8,X,Y,P) ==> ~cell(U,8,R) & ~cell(U,8,wq)
 drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & control(black) & moveAllowed(U,1,X,Y,P) ==> ~cell(U,1,R) & ~cell(U,1,bq)
 
 %Movement into empty spaces
-drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
-drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
+drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
+drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
 
 </textarea>
 
