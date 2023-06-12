@@ -6,8 +6,6 @@
   <title>Chess Editor</title>
   <script type='text/javascript' src='../epilog/javascript/epilog.js'></script>
   <script type='text/javascript' src='../worksheets/javascript/worksheets.js'></script>
-  <script type='text/javascript' src='/epilog/javascript/epilog.js'></script>
-  <script type='text/javascript' src='/worksheets/javascript/worksheets.js'></script>
   <script type='text/javascript'>
 //------------------------------------------------------------------------------
 // Code
@@ -231,7 +229,14 @@ Drag pieces to desired squares or edit Lambda.  To restart, press the restart bu
   <br/>
   <br/>
 </center>
-
+<center>
+  <br/>
+  Light blue highlight = your piece you just clicked on whose moves are being highlighted, Light yellow highlight = potential normal move, Yellow highlight = potential kill move
+  <br/>
+  The current light blue highlighted <span id='selectedpiece' style='font-size:18px;color:#666666'>-</span> 
+  has: <span id='normalmoves' style='font-size:18px;color:#666666'>-</span> potential normal moves 
+  and <span id='killmoves' style='font-size:18px;color:#666666'>-</span> potential kill moves
+</center>
         </td>
       </tr>
     </table>
@@ -357,11 +362,12 @@ innerhtml(cell(M,N),"<img src='Black_Rook.png' height='50' draggable='true' ondr
 innerhtml(cell(M,N),"<img src='Black_Pawn.png' height='50' draggable='true' ondragstart='drag(event)'/>") :- cell(M,N,bp)
 innerhtml(cell(M,N),"&nbsp;") :- empty(M,N)
 innerhtml(control,W) :- control(W)
+innerhtml(selectedpiece,P) :- selectedpiece(P)
 style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
 style(cell(M,N),"cursor","text") :- empty(M,N)
 style(cell(M,N), "background-color", Color) :- highlight(M,N,Color)
 
-% hoghlights possible attacks when you click a wp
+% highlights possible attacks when you click your piece on your turn
 attribute(cell(M,N),"onclick","modbutton(this)") :- col(M) & line(N) & cell(M,N,P)
 click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) & cell(U,V,Q) & attackAllowed(M,N,U,V,P,Q) ==> highlight(U,V, "yellow")
 click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) & cell(U,V,Q) & attackAllowed(M,N,U,V,P,Q) ==> highlight(U,V, "yellow")
@@ -369,12 +375,28 @@ click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) & cell(U,V,Q) & at
 click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) &  moveAllowed(M,N,U,V,P) ==> highlight(U,V, "lightyellow")
 click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) &  moveAllowed(M,N,U,V,P) ==> highlight(U,V, "lightyellow")
 
+click(cell(M,N)) :: cell(M,N,P) & isWhite(P) & control(white) ==> selectedpiece(P) & highlight(M,N, "lightblue")
+click(cell(M,N)) :: cell(M,N,P) & isBlack(P) & control(black) ==> selectedpiece(P) & highlight(M,N, "lightblue")
 
-% resets everything to white when you click a different piece
-click(cell(U,V)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
-click(cell(U,V)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
-drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V)& highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+% resets everything to white when you click a new piece
+click(cell(U,V)) :: col(M) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+
+click(cell(U,V)) :: col(M) & distinct(M, U) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+
+click(cell(U,V)) :: col(M) & distinct(M, U) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+click(cell(U,V)) :: line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+
+drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "lightyellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightyellow")
+
+drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "yellow") ==>  highlight(M,N,"white") & ~highlight(M,N, "yellow")
+
+drag(cell(U,V),cell(X,Y)) :: col(M) & distinct(M, U) & line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+drag(cell(U,V),cell(X,Y)) :: line(N) & distinct(N, V) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+
 
 % king moves and attack %
 kingMove(C1,L,C2,L) :- colAdjacent(C1,C2)
