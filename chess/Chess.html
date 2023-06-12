@@ -359,10 +359,15 @@ innerhtml(cell(M,N),"&nbsp;") :- empty(M,N)
 innerhtml(control,W) :- control(W)
 style(cell(M,N),"cursor","pointer") :- cell(M,N,R)
 style(cell(M,N),"cursor","text") :- empty(M,N)
-style(cell(M,N), "background-color", "lightblue") :- highlight(M,N)
+style(cell(M,N), "background-color", Color) :- highlight(M,N,Color)
 
+% hoghlights possible attacks when you click a wp
 attribute(cell(M,N),"onclick","modbutton(this)") :- col(M) & line(N) & cell(M,N,wp)
-click(cell(M,N)) :: cell(M,N,wp) & control(white) & pawnAttackWhite(M,N,U,V) & cell(U,V,Q) & isBlack(Q) ==> highlight(U,V)
+click(cell(M,N)) :: cell(M,N,wp) & control(white) & pawnAttackWhite(M,N,U,V) & cell(U,V,Q) & isBlack(Q) ==> highlight(U,V, "lightblue")
+
+% resets everything to white when you click a new piece
+click(cell(U,V)) :: col(M) & line(N) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
+drag(cell(U,V),cell(X,Y)) :: col(M) & line(N) & highlight(M,N, "lightblue") ==>  highlight(M,N,"white") & ~highlight(M,N, "lightblue")
 
 
 % king moves and attack %
@@ -507,10 +512,6 @@ drag(cell(U,1),cell(X,Y)) :: cell(U,1,bq) & cell(U,1,R) & distinct(bq, R) & cont
 %Movement into empty spaces
 drag(cell(U,V),cell(X,Y)) :: control(white) & isWhite(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y)  ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(white) & control(black)
 drag(cell(U,V),cell(X,Y)) :: control(black) & isBlack(P) & cell(U,V,P) & moveAllowed(U,V,X,Y,P) & empty(X,Y) ==> ~cell(U,V,P) & cell(X,Y,P) & ~control(black) & control(white)
-
-cor(X,Y) :- value(cell, background-color, "blue")
-
-click(cell(M,N)) :: cell(M,N, P) ==> cor(X,Y)
 
 </textarea>
 
